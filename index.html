@@ -3,10 +3,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="initial-scale=1.0, target-densitydpi=device-dpi" />
-    <meta name="viewport" content="initial-scale=1.0, width=device-height">
     <script src="modernizr.js"></script>
     <!--[if lt IE 9]>
     <script type="text/javascript" src="flashcanvas.js"></script>
@@ -36,8 +34,7 @@
 
         /* Drawing the 'gripper' for touch-enabled devices */
         html.touch #content {
-            float:left;
-            width:92%;
+            width:100%;
         }
         html.touch #scrollgrabber {
             float:right;
@@ -109,7 +106,7 @@
         $(document).ready(function() {
 
             // This is the part where jSignature is initialized.
-            var $sigdiv = $("#signature").jSignature({'UndoButton':true})
+            var $sigdiv = $("#signature").jSignature({'UndoButton':true, 'height': '300px', 'width':'100%'});
             var $tools = $('#tools');
             var $extraarea = $('#displayarea');
             var pubsubprefix = 'jSignature.demo.';
@@ -132,7 +129,7 @@
             });
 
             if (Modernizr.touch){
-                $('#scrollgrabber').height($('#content').height())
+                // $('#scrollgrabber').height($('#content').height())
             }
 
         })
