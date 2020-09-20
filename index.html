@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="initial-scale=1.0, target-densitydpi=device-dpi" />
+    <meta name="viewport" content="initial-scale=1.0, width=device-height">
+    <script src="modernizr.js"></script>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="flashcanvas.js"></script>
+    <![endif]-->
+    <style type="text/css">
+
+        input {
+            padding: .5em;
+            margin: .5em;
+        }
+        select {
+            padding: .5em;
+            margin: .5em;
+        }
+
+        #signatureparent {
+            color:darkblue;
+            /*max-width:600px;*/
+            padding:10px;
+        }
+
+        /*This is the div within which the signature canvas is fitted*/
+        #signature {
+            border: 2px dotted black;
+            background-color:lightgrey;
+        }
+
+        /* Drawing the 'gripper' for touch-enabled devices */
+        html.touch #content {
+            float:left;
+            width:92%;
+        }
+        html.touch #scrollgrabber {
+            float:right;
+            width:4%;
+            margin-right:2%;
+            background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAFCAAAAACh79lDAAAAAXNSR0IArs4c6QAAABJJREFUCB1jmMmQxjCT4T/DfwAPLgOXlrt3IwAAAABJRU5ErkJggg==)
+        }
+        html.borderradius #scrollgrabber {
+            border-radius: 1em;
+        }
+
+    </style>
+</head>
+<body>
+<div>
+    <div id="content">
+        <div id="signatureparent">
+            <div id="signature"></div></div>
+        <div id="tools"></div>
+        <div id="displayarea"></div>
+    </div>
+    <div id="scrollgrabber"></div>
+</div>
+<script src="jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+    jQuery.noConflict()
+</script>
+<script>
+    (function($) {
+        var topics = {};
+        $.publish = function(topic, args) {
+            if (topics[topic]) {
+                var currentTopic = topics[topic],
+                    args = args || {};
+
+                for (var i = 0, j = currentTopic.length; i < j; i++) {
+                    currentTopic[i].call($, args);
+                }
+            }
+        };
+        $.subscribe = function(topic, callback) {
+            if (!topics[topic]) {
+                topics[topic] = [];
+            }
+            topics[topic].push(callback);
+            return {
+                "topic": topic,
+                "callback": callback
+            };
+        };
+        $.unsubscribe = function(handle) {
+            var topic = handle.topic;
+            if (topics[topic]) {
+                var currentTopic = topics[topic];
+
+                for (var i = 0, j = currentTopic.length; i < j; i++) {
+                    if (currentTopic[i] === handle.callback) {
+                        currentTopic.splice(i, 1);
+                    }
+                }
+            }
+        };
+    })(jQuery);
+
+</script>
+<script src="jSignature.min.noconflict.js"></script>
+<script>
+    (function($){
+        $(document).ready(function() {
+
+            // This is the part where jSignature is initialized.
+            var $sigdiv = $("#signature").jSignature({'UndoButton':true})
+            var $tools = $('#tools');
+            var $extraarea = $('#displayarea');
+            var pubsubprefix = 'jSignature.demo.';
+
+            $('<input type="button" value="提交">').bind('click', function(e){
+                var data = $sigdiv.jSignature('getData', 'image');
+                $.publish(pubsubprefix + 'image/png;base64', data);
+            }).appendTo($tools);
+
+            $('<input type="button" value="清除">').bind('click', function(e){
+                $sigdiv.jSignature('reset');
+                $extraarea.html('');
+            }).appendTo($tools);
+
+            $.subscribe(pubsubprefix + 'image/png;base64', function(data) {
+                $extraarea.html('');
+                var i = new Image();
+                i.src = 'data:' + data[0] + ',' + data[1];
+                $(i).appendTo($extraarea)
+            });
+
+            if (Modernizr.touch){
+                $('#scrollgrabber').height($('#content').height())
+            }
+
+        })
+
+    })(jQuery)
+</script>
+</body>
+</html>
